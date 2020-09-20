@@ -3,94 +3,128 @@ import 'package:login_page/Anasayfa.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:login_page/main.dart';
 
+
 void main() {
   runApp(MyApp());
 }
 
 SharedPreferences localStorage;
 
-TextEditingController usernameController = new TextEditingController();
+TextEditingController userController = new TextEditingController();
 TextEditingController pwdController = new TextEditingController();
 
+class MyApp extends StatelessWidget {
+  static Future init() async  {
+    localStorage = await SharedPreferences.getInstance();
+  }
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return MaterialApp(
+      home: MyHome(),
+    );
+  }
+}
 
 
 class Login extends StatelessWidget {
+  final _fKey = GlobalKey<FormState>();
+  void _sbt() {
+    final isValid = _fKey.currentState.validate();
+    if (!isValid) {
+      return _sbt();
+    }
+    _fKey.currentState.save();
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      backgroundColor: Colors.greenAccent,
-      body: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: SingleChildScrollView(
+      appBar: AppBar(
+        backgroundColor: Colors.orange,
+      ),
+      body: Container(
+        color: Colors.lightGreenAccent,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10,100,10,50),
           child: Center(
             child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: 100),
-                ),
+              children: [
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        "Username:",
-                        style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      TextField(
-                          controller: usernameController,
+                  child: Form(
+                    key: _fKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "Username"
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        TextFormField(
+                          validator: (value){
+                            if (value.isEmpty){
+                              return 'Enter a valid username';
+                            }
+                            return null;
+                          },
+                          controller: userController,
                           obscureText: false,
                           decoration: InputDecoration(
-                              border: InputBorder.none,
-                              fillColor: Color(0xfff3f3f4),
-                              filled: true))
-                    ],
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        "Password :",
-                        style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      TextField(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0),)
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "Password"
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        TextFormField(
+                          validator: (value){
+                            if (value.isEmpty){
+                              return 'Enter a valid password';
+                            }
+                            return null;
+                          },
                           controller: pwdController,
                           obscureText: true,
                           decoration: InputDecoration(
-                              border: InputBorder.none,
-                              fillColor: Color(0xfff3f3f4),
-                              filled: true))
-                    ],
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(10.0),)
+                            )
+                          )
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(top: 50),
+                SizedBox(
+                  height: 20,
                 ),
                 RaisedButton(
+                  color: Colors.lightBlueAccent ,
                   child: Text('Login'),
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                    _sbt();
+                    SharedPrefs.saveUserName(userController.text);
+                    SharedPrefs.savePassword(pwdController.text);
+                    if (usernameController.text==userController.text && passwordController.text ==pwdController.text){
+                      if (SharedPrefs.saveUserName(userController.text)!=null && SharedPrefs.savePassword(pwdController.text)!=null){
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()
+                        ));
+                      }
+                    }
+
                   }
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 50),
-                ),
-                if (localStorage != null)
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Text("User Logged in!!! ->  Username: ${localStorage.get('username')}  Password: ${localStorage.get('password')}",style: TextStyle(fontSize: 20),),
+
                   ),
               ],
             ),
@@ -100,15 +134,6 @@ class Login extends StatelessWidget {
     );
   }
 }
-
-
-save() async {
-  await MyApp.init();
-  localStorage.setString('email', usernameController.text.toString());
-  localStorage.setString('password', pwdController.text.toString());
-
-}
-
 
 
 
